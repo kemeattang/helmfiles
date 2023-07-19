@@ -1,0 +1,19 @@
+# CLUSTER_NAME=XXXX helmfile -f shared/cluster-autoscaler.yaml diff
+
+repositories:
+- name: autoscaler
+  url: https://kubernetes.github.io/autoscaler
+
+releases:
+- name: cluster-autoscaler
+  namespace: kube-system
+  chart: autoscaler/cluster-autoscaler
+  version: 9.15.0 # https://github.com/kubernetes/autoscaler/tree/cluster-autoscaler-1.23.0/charts/cluster-autoscaler
+  values:
+  - autoDiscovery:
+      clusterName: {{ requiredEnv "CLUSTER_NAME" }}
+    awsRegion: us-west-2
+    podAnnotations:
+      iam.amazonaws.com/role: kiam/cluster-autoscaler
+  timeout: 120
+  wait: true
