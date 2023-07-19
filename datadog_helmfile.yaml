@@ -1,0 +1,71 @@
+# ENVIRONMENT=dev2    helmfile -f shared/datadog.yaml diff
+# ENVIRONMENT=devops  helmfile -f shared/datadog.yaml diff
+# ENVIRONMENT=staging helmfile -f shared/datadog.yaml diff
+# ENVIRONMENT=prod    helmfile -f shared/datadog.yaml diff
+
+repositories:
+- name: datadog
+  url: https://helm.datadoghq.com
+
+releases:
+- name: datadog
+  namespace: kube-system
+  chart: datadog/datadog
+  version: 3.6.6 # https://github.com/DataDog/helm-charts/tree/datadog-3.6.6/charts/datadog
+  values:
+  - agents:
+      containers:
+        agent:
+          logLevel: WARN
+        processAgent:
+          logLevel: WARN
+        traceAgent:
+          env:
+            - name: DD_APM_IGNORE_RESOURCES
+              value: "GET /healthcheck"     
+          logLevel: WARN
+        systemProbe:
+          logLevel: WARN
+        securityAgent:
+          logLevel: WARN
+    datadog:
+      containerExclude: "kube_namespace:secops"
+      clusterName: XXXX
+      apiKey: XXX
+      appKey: XXXX
+      logs:
+        enabled: true
+        containerCollectAll: true
+      apm:
+        enabled: true
+      processAgent:
+        enabled: true
+      # prometheusScrape:
+      #   enabled: false
+      # confd: # {}
+      #   openmetrics.yaml: |-
+      #     init_config:
+      #     instances:
+      #     {{- if eq (requiredEnv "ENVIRONMENT") "devops" }}
+      #     []
+      #     {{- else }}
+      #     # The prometheus endpoint to query from
+      #     {{- if eq (requiredEnv "ENVIRONMENT") "prod" }}
+      #     - prometheus_url: https://verify.kou.pn/metrics
+      #     {{- else }}
+      #     - prometheus_url: https://verify-{{ requiredEnv "ENVIRONMENT" }}.kou.pn/metrics
+      #     {{- end }}
+      #       namespace: "vwk-{{ requiredEnv "ENVIRONMENT" }}"
+      #       metrics:
+      #       - "*"
+      #     {{- end }}
+      dogstatsd:
+        port: 8125
+        useHostPort: true
+        nonLocalTraffic: false
+    providers:
+      eks:
+        ec2:
+          useHostnameFromFile: true
+  timeout: 600
+  wait: true
