@@ -12,8 +12,5 @@ releases:
   values:
   - autoDiscovery:
       clusterName: {{ requiredEnv "CLUSTER_NAME" }}
-    awsRegion: us-west-2
-    podAnnotations:
-      iam.amazonaws.com/role: kiam/cluster-autoscaler
   timeout: 120
   wait: true

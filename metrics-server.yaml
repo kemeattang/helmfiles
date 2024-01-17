@@ -1,0 +1,16 @@
+# helmfile -f metrics-server.yaml diff
+
+repositories:
+- name: metrics-server
+  url: https://kubernetes-sigs.github.io/metrics-server/
+
+releases:
+- name: metrics-server
+  namespace: "kube-system"
+  chart: metrics-server/metrics-server
+  version: 3.11.0 # https://github.com/kubernetes-sigs/metrics-server/tree/v0.6.4/charts/metrics-server
+  values:
+  - args:
+    - --kubelet-insecure-tls
+    - --kubelet-preferred-address-types=InternalIP
+  wait: true
