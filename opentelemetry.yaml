@@ -1,0 +1,42 @@
+# helmfile -f opentelemetry.yaml diff
+
+repositories:
+- name: open-telemetry
+  url: https://open-telemetry.github.io/opentelemetry-helm-charts
+
+releases:
+- name: opentelemetry-collector
+  namespace: devops
+  chart: open-telemetry/opentelemetry-collector
+  version: 0.80.0
+  values:
+  - config:
+      exporters:
+        datadog:
+          api:
+            key: "Provide API KEY"
+      processors:
+        batch:
+          timeout: 10s
+      service:
+        pipelines:
+          logs:
+            exporters:
+            - logging
+          metrics:
+            exporters:
+            - logging
+            - datadog
+          traces:
+            exporters:
+            - logging
+            - datadog
+    agentCollector:
+      enabled: true
+      containerLogs:
+        enabled: true
+    standaloneCollector:
+      enabled: true
+  createNamespace: true
+  wait: true
+  timeout: 120
