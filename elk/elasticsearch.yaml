@@ -1,0 +1,11 @@
+repositories:
+  - name: bitnami
+    url: oci://registry-1.docker.io/bitnamicharts
+
+releases:
+  - name: elasticsearch
+    namespace: devsecops
+    chart: bitnami/elasticsearch
+    version: "21.4.1"  # Specify the version you want
+    installed: true
+    createNamespace: true
