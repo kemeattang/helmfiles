@@ -1,0 +1,26 @@
+# DOMAIN=example.com helmfile -f elk/kibana.yaml diff
+repositories:
+  - name: bitnami
+    url: oci://registry-1.docker.io/bitnamicharts
+
+releases:
+- name: kibana
+  namespace: devsecops
+  chart: bitnami/kibana
+  version: 11.4.1 # https://github.com/elastic/helm-charts/tree/v7.17.1
+  values:
+  - ingress:
+      enabled: true
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: 'elk.{{ requiredEnv "DOMAIN" }}'
+      hosts:
+      - 'elk.{{ requiredEnv "DOMAIN" }}'
+      tls:
+      - secretName: kibana-tls
+        hosts:
+        - 'elk.{{ requiredEnv "DOMAIN" }}'
+    elasticsearch:
+      hosts: []
+      port: ""
+  wait: true
+  timeout: 300
