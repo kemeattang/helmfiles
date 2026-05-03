@@ -36,25 +36,6 @@ releases:
         enabled: true
       processAgent:
         enabled: true
-      # prometheusScrape:
-      #   enabled: false
-      # confd: # {}
-      #   openmetrics.yaml: |-
-      #     init_config:
-      #     instances:
-      #     {{- if eq (requiredEnv "ENVIRONMENT") "devops" }}
-      #     []
-      #     {{- else }}
-      #     # The prometheus endpoint to query from
-      #     {{- if eq (requiredEnv "ENVIRONMENT") "prod" }}
-      #     - prometheus_url: https://verify.kou.pn/metrics
-      #     {{- else }}
-      #     - prometheus_url: https://verify-{{ requiredEnv "ENVIRONMENT" }}.kou.pn/metrics
-      #     {{- end }}
-      #       namespace: "vwk-{{ requiredEnv "ENVIRONMENT" }}"
-      #       metrics:
-      #       - "*"
-      #     {{- end }}
       dogstatsd:
         port: 8125
         useHostPort: true
