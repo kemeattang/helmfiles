@@ -1,0 +1,22 @@
+# ENVIRONMENT=devops  CLUSTER_NAME=devops  helmfile -f shared/aws-load-balancer-controller.yaml diff
+# input the vpc id and region in there 
+repositories:
+- name: eks
+  url: https://aws.github.io/eks-charts
+
+releases:
+- name: "aws-load-balancer-controller"
+  namespace: "kube-system"
+  chart: "eks/aws-load-balancer-controller"
+  version: "1.4.7" # https://github.com/kubernetes-sigs/aws-load-balancer-controller/tree/v2.12.0/helm/aws-load-balancer-controller
+  values:
+  - replicaCount: 3
+    vpcId: {{ vpcid }}
+    region: {{ region }}
+    podAnnotations:
+      iam.amazonaws.com/role: {{ exec "../resources/ssm.sh" (list "aws-load-balancer-controller/INGRESS_IAM_ROLE") }}
+    clusterName: {{ requiredEnv "CLUSTER_NAME" }}
+    logLevel: debug
+    disableRestrictedSecurityGroupRules: true
+  wait: true
+  timeout: 60
