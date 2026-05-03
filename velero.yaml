@@ -1,0 +1,46 @@
+# CLUSTER_NAME=devops AWS_ACCOUNT_ALIAS=example-alias helmfile -f shared/velero.yaml diff
+
+repositories:
+- name: vmware-tanzu
+  url: https://vmware-tanzu.github.io/helm-charts
+
+releases:
+- name: velero
+  namespace: devops
+  chart: vmware-tanzu/velero
+  version: 2.27.1 # https://github.com/vmware-tanzu/helm-charts/tree/velero-2.27.1/charts/velero
+  values:
+  - podAnnotations:
+      iam.amazonaws.com/role: kiam/velero
+    initContainers:
+     - name: velero-plugin-for-aws
+       image: velero/velero-plugin-for-aws:v1.3.0
+       imagePullPolicy: IfNotPresent
+       volumeMounts:
+         - mountPath: /target
+           name: plugins
+    configuration:
+      provider: aws
+      backupStorageLocation:
+        name: default
+        bucket: {{ requiredEnv "AWS_ACCOUNT_ALIAS" }}-velero
+        config:
+          region: us-west-2
+        prefix: {{ requiredEnv "CLUSTER_NAME" }}/
+      volumeSnapshotLocation:
+        config:
+          region: us-west-2
+    schedules:
+      dr:
+        disabled: false
+        schedule: "*/15 * * * *"
+        useOwnerReferencesInBackup: false
+        template:
+          ttl: "720h"
+          excludedNamespaces:
+           - default
+           - kube-system
+           - kube-public
+           - kube-node-lease
+  timeout: 60
+  wait: true

@@ -1,0 +1,22 @@
+# helmfile -f shared/kiam.yaml diff
+# kubectl annotate namespaces <namespace> iam.amazonaws.com/permitted=".*"
+# kubectl annotate ns kube-system iam.amazonaws.com/permitted='.*
+repositories:
+- name: uswitch
+  url: https://uswitch.github.io/kiam-helm-charts/charts/
+
+releases:
+- name: kiam
+  namespace: "kube-system"
+  chart: uswitch/kiam
+  version: 6.1.2 # https://github.com/uswitch/kiam/tree/v4.2/helm/kiam
+  values:
+  - agent:
+      host:
+        iptables: true
+        interface: '!eth0'
+    server:
+      sslCertHostPath: /etc/pki/ca-trust/extracted/pem/
+      useHostNetwork: true
+      sessionDuration: 30m
+  wait: true
